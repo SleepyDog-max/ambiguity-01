@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歧义小测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #ff6f61;
+            margin-bottom: 20px;
+        }
+        .question {
+            display: none;
+            color: #333;
+        }
+        .question.active {
+            display: block;
+        }
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e0f7fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .options label:hover {
+            background-color: #b2ebf2;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #ffca28;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #ffb300;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .summary {
+            display: none;
+            text-align: left;
+        }
+        .summary h2 {
+            color: #4caf50;
+        }
+        .summary p {
+            color: #555;
+        }
+        #restart {
+            margin-top: 20px;
+            background-color: #4caf50;
+            color: white;
+        }
+        #restart:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>歧义小测试</h1>
+
+        <!-- Question 1 -->
+        <div class="question" id="q1">
+            <p><strong>句子：</strong>妈妈炒的菜很好。</p>
+            <div class="options">
+                <label><input type="radio" name="q1" value="A"> A. 妈妈炒出来的菜很好。</label>
+                <label><input type="radio" name="q1" value="B"> B. 妈妈用菜炒得很好。</label>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question" id="q2">
+            <p><strong>句子：</strong>他开着车回家了。</p>
+            <div class="options">
+                <label><input type="radio" name="q2" value="A"> A. 他驾驶着车回家了。</label>
+                <label><input type="radio" name="q2" value="B"> B. 他打开车后回家了。</label>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question" id="q3">
+            <p><strong>句子：</strong>他吃着饭睡着了。</p>
+            <div class="options">
+                <label><input type="radio" name="q3" value="A"> A. 他一边吃饭一边睡着了。</label>
+                <label><input type="radio" name="q3" value="B"> B. 他用饭把自己弄睡着了。</label>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question" id="q4">
+            <p><strong>句子：</strong>她画的鱼很漂亮。</p>
+            <div class="options">
+                <label><input type="radio" name="q4" value="A"> A. 她画出来的鱼很漂亮。</label>
+                <label><input type="radio" name="q4" value="B"> B. 她画的那条鱼很漂亮。</label>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question" id="q5">
+            <p><strong>句子：</strong>警察抓住了偷东西的小孩笑了。</p>
+            <div class="options">
+                <label><input type="radio" name="q5" value="A"> A. 警察抓住偷东西的小孩后笑了。</label>
+                <label><input type="radio" name="q5" value="B"> B. 警察抓住的小孩一边偷东西一边笑。</label>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary" id="summary">
+            <h2>测验结果</h2>
+            <p id="score"></p>
+            <p><strong>你的答案与解析：</strong></p>
+            <p id="q1-result">1. “妈妈炒的菜很好”</p>
+            <p id="q2-result">2. “他开着车回家了”</p>
+            <p id="q3-result">3. “他吃着饭睡着了”</p>
+            <p id="q4-result">4. “她画的鱼很漂亮”</p>
+            <p id="q5-result">5. “警察抓住了偷东西的小孩笑了”</p>
+            <button id="restart">重新开始</button>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="buttons">
+            <button id="prev" disabled>上一题</button>
+            <button id="next">下一题</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = document.querySelectorAll('.question');
+        const prevBtn = document.getElementById('prev');
+        const nextBtn = document.getElementById('next');
+        const summary = document.getElementById('summary');
+        const scoreText = document.getElementById('score');
+        const restartBtn = document.getElementById('restart');
+        let currentQuestion = 0;
+
+        // Correct answers and explanations
+        const answers = {
+            q1: { correct: 'A', text: '妈妈炒出来的菜很好', explanation: '歧义在“炒的菜”，应理解为妈妈做的菜很好，而非妈妈用菜炒得很好。' },
+            q2: { correct: 'A', text: '他驾驶着车回家了', explanation: '“开着车”在此意为“驾驶”而非“打开”。' },
+            q3: { correct: 'A', text: '他一边吃饭一边睡着了', explanation: '“吃着饭”表示正在进行的动作。' },
+            q4: { correct: 'A', text: '她画出来的鱼很漂亮', explanation: '指的是画作中的鱼而非现实的鱼。' },
+            q5: { correct: 'A', text: '警察抓住偷东西的小孩后笑了', explanation: '“笑了”是警察的行为。' }
+        };
+
+        // Show first question
+        questions[currentQuestion].classList.add('active');
+
+        // Next button logic
+        nextBtn.addEventListener('click', () => {
+            questions[currentQuestion].classList.remove('active');
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                questions[currentQuestion].classList.add('active');
+                prevBtn.disabled = false;
+            } else {
+                showSummary();
+            }
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.textContent = '提交';
+            }
+            if (currentQuestion >= questions.length) {
+                nextBtn.style.display = 'none';
+                prevBtn.style.display = 'none';
+            }
+        });
+
+        // Previous button logic
+        prevBtn.addEventListener('click', () => {
+            questions[currentQuestion].classList.remove('active');
+            currentQuestion--;
+            questions[currentQuestion].classList.add('active');
+            nextBtn.textContent = '下一题';
+            if (currentQuestion === 0) {
+                prevBtn.disabled = true;
+            }
+        });
+
+        // Calculate and show summary
+        function showSummary() {
+            let score = 0;
+            for (let i = 1; i <= 5; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                const resultText = document.getElementById(`q${i}-result`);
+                const answer = answers[`q${i}`];
+                let userAnswer = selected ? selected.value : '未选择';
+                let userAnswerText = selected ? selected.nextSibling.textContent.trim() : '未选择';
+
+                if (selected && selected.value === answer.correct) {
+                    score++;
+                }
+
+                resultText.innerHTML = `${i}. “${questions[i-1].querySelector('p').textContent.split('：')[1]}”<br>` +
+                                      `<strong>你的答案：</strong> ${userAnswer}. ${userAnswerText}<br>` +
+                                      `<strong>正确答案：</strong> ${answer.correct}. ${answer.text}<br>` +
+                                      `<strong>解析：</strong> ${answer.explanation}`;
+            }
+            questions.forEach(q => q.classList.remove('active')); // Hide all questions
+            summary.style.display = 'block';
+            scoreText.textContent = `你的得分：${score}/5`;
+        }
+
+        // Restart button logic
+        restartBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            questions.forEach((q, index) => {
+                q.classList.remove('active'); // Remove active class from all
+                const radios = q.querySelectorAll('input[type="radio"]');
+                radios.forEach(radio => radio.checked = false); // Reset radio buttons
+                if (index === 0) {
+                    q.classList.add('active'); // Show only the first question
+                }
+            });
+            summary.style.display = 'none';
+            prevBtn.disabled = true;
+            nextBtn.style.display = 'inline';
+            prevBtn.style.display = 'inline';
+            nextBtn.textContent = '下一题';
+        });
+    </script>
+</body>
+</html>
